@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 为这个mapper指定一个唯一的namespace，namespace的值习惯上设置成包名+sql映射文件名，这样就能够保证namespace的值是唯一的
+	例如namespace="com.szh.mapper.personMapper"就是com.szh.mapper(包名)+personMapper(personMapper.xml文件去除后缀) -->
+<mapper namespace="com.fh.mapper.OrderMapper">
+
+    <!--<sql id="whereSql">
+        <where>
+            <if test="productName != null and drugName != ''">
+                and drug_name like concat('%',#{drugName},'%')
+            </if>
+        </where>
+    </sql>-->
+
+
+    <select id="queryProduct" resultType="product">
+        select * from order_product
+    </select>
+
+    <select id="queryCount" parameterType="com.fh.model.OrderQuery" resultType="long">
+        select count(*) from ssm_order
+    </select>
+
+    <select id="queryOrderList" parameterType="com.fh.model.OrderQuery" resultType="com.fh.model.Order">
+        select yo.*,yp.name "productName",yp.price "productPrice" from ssm_order yo
+        left join order_product yp on yo.productId = yp.id
+        where yo.isDel = 1
+        limit #{start},#{length}
+    </select>
+
+    <select id="getProductId" parameterType="int" resultType="Product">
+        select *  from order_product
+        where id = #{id}
+    </select>
+
+
+    <insert id="addOrder" parameterType="Order">
+        INSERT INTO ssm_order (productId,count,subtotal,isDel)
+        VALUES (
+        #{productId}, #{count}, #{subtotal}, #{isDel}
+        );
+    </insert>
+
+    <select id="getOrderById" parameterType="int" resultType="Order">
+        select td.*,tp.price "productPrice" from ssm_order td
+        left join order_product tp on td.productId = tp.id
+        where td.orderId = #{id}
+    </select>
+
+    <update id="updateOrder" parameterType="Order">
+        update ssm_order set
+        productId=#{productId}, count=#{count}, subtotal=#{subtotal}
+        where orderId = #{orderId}
+    </update>
+
+    <delete id="deleteOrder" parameterType="int">
+        update ssm_order set
+        isDel=2
+        where orderId = #{orderId}
+    </delete>
+
+</mapper>
